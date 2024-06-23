@@ -13,37 +13,15 @@ import io.opentelemetry.context.*;
 
 public class Main {
     private static ClickHouseClient client;
-
     private static Tracer tracer = GlobalOpenTelemetry.getTracer("application");
 
 
     public static void main(String[] args) throws ClickHouseException, ExecutionException, InterruptedException {
-
         Span span = tracer.spanBuilder("Application Main").setSpanKind(SpanKind.INTERNAL).startSpan();
 
         try (Scope scope = span.makeCurrent()) {
             clickhouse();
-        } catch(Throwable t) {
-            span.recordException(t);
-            throw t;
-        } finally {
-            span.end();
-        }
-    }
-
-    private static void setup(ClickHouseNodes servers) throws ExecutionException, InterruptedException {
-        Span span = tracer.spanBuilder("Setup Database").setSpanKind(SpanKind.INTERNAL).startSpan();
-
-        try (Scope scope = span.makeCurrent()) {
-            CompletableFuture<List<ClickHouseResponseSummary>> future = ClickHouseClient.send(servers.apply(servers.getNodeSelector()),
-                "create database if not exists my_base",
-                "use my_base",
-                "create table if not exists test_table(s String) engine=Memory",
-                "truncate test_table",
-                "insert into test_table values('1')('2')('3')");
-            future.get();
-
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             span.recordException(t);
             throw t;
         } finally {
@@ -54,7 +32,6 @@ public class Main {
     private static void clickhouse() throws ClickHouseException, ExecutionException, InterruptedException {
         ClickHouseNodes servers = ClickHouseNodes.of("http://localhost:8123/default?compress=0");
         ClickHouseResponse response;
-
 
         setup(servers);
 
@@ -76,7 +53,7 @@ public class Main {
         }
         response.close();
 
-        response = client.read(servers)
+        response = client.write(servers.apply(servers.getNodeSelector()))
             .query("insert into test_table values(:val1)(:val2)(:val3)")
             .params(Map.of("val1", "1", "val2", "2", "val3", "3"))
             .executeAndWait();
@@ -139,13 +116,33 @@ public class Main {
         response.close();
 
         try (ClickHouseResponse response1 = client.read(servers)
-                 .format(ClickHouseFormat.RowBinaryWithNamesAndTypes)
-                 .query("select * from nonexistent")
-                 .executeAndWait()) {
+            .format(ClickHouseFormat.RowBinaryWithNamesAndTypes)
+            .query("select * from nonexistent")
+            .executeAndWait()) {
             //...
         } catch (ClickHouseException e) {
             System.out.println("Exception: " + e.getMessage());
         }
         client.close();
+    }
+
+    private static void setup(ClickHouseNodes servers) throws ExecutionException, InterruptedException {
+        Span span = tracer.spanBuilder("Setup Database").setSpanKind(SpanKind.INTERNAL).startSpan();
+
+        try (Scope scope = span.makeCurrent()) {
+            CompletableFuture<List<ClickHouseResponseSummary>> future = ClickHouseClient.send(servers.apply(servers.getNodeSelector()),
+                "create database if not exists my_base",
+                "use my_base",
+                "create table if not exists test_table(s String) engine=Memory",
+                "truncate test_table",
+                "insert into test_table values('1')('2')('3')");
+            future.get();
+
+        } catch (Throwable t) {
+            span.recordException(t);
+            throw t;
+        } finally {
+            span.end();
+        }
     }
 }
