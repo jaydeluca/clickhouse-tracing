@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+
+
+dependencies {
+    implementation("com.clickhouse:clickhouse-http-client:0.6.1")
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.2.3")
+
+    implementation(platform("io.opentelemetry:opentelemetry-bom:1.39.0"));
+    implementation("io.opentelemetry:opentelemetry-api");
+    implementation("io.opentelemetry:opentelemetry-sdk");
+    implementation("io.opentelemetry:opentelemetry-exporter-otlp");
+    implementation("io.opentelemetry.semconv:opentelemetry-semconv:1.25.0-alpha");
+    implementation("io.opentelemetry:opentelemetry-sdk-extension-autoconfigure");
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClass = 'test.clickhouse.Main'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'test.clickhouse.Main'
+    }
+}
+
+shadowJar {
+    archiveBaseName.set('clickhouse-playground')
+    archiveVersion.set('1.0-SNAPSHOT')
+    archiveClassifier.set('')
+    manifest {
+        attributes 'Main-Class': 'test.clickhouse.Main'
+    }
+}
