@@ -14,7 +14,7 @@ repositories {
 
 
 dependencies {
-    implementation("com.clickhouse:clickhouse-http-client:0.6.1")
+    implementation("com.clickhouse:clickhouse-http-client:0.6.4")
     implementation("org.apache.httpcomponents.client5:httpclient5:5.2.3")
 
     implementation(platform("io.opentelemetry:opentelemetry-bom:1.39.0"));
