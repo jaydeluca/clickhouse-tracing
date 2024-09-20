@@ -3,9 +3,9 @@ receivers:
   otlp:
     protocols:
       grpc:
-        endpoint: otel_collector:4318
+        endpoint: otel-collector:4317
       http:
-        endpoint: otel_collector:4317
+        endpoint: otel-collector:4318
 
 exporters:
 
@@ -19,10 +19,6 @@ processors:
 
 service:
   pipelines:
-    metrics:
-        receivers: [otlp]
-        processors: [batch]
-        exporters: [otlp]
     traces:
       receivers: [otlp]
       processors: [batch]

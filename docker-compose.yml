@@ -10,6 +10,8 @@ services:
 
   jaeger:
     image: jaegertracing/all-in-one:latest
+    networks:
+      - inst-java-apps-using-otel
     environment:
       - COLLECTOR_OTLP_ENABLED=true
     ports:
@@ -18,7 +20,7 @@ services:
       - "14250:14250"
       - "14268:14268"
 
-  otel_collector:
+  otel-collector:
     image: otel/opentelemetry-collector-contrib:0.102.0
     volumes:
       - ./collector-config.yml:/etc/otelcol/collector-config.yml
@@ -41,20 +43,21 @@ services:
     networks:
       - inst-java-apps-using-otel
     depends_on:
-      - otel_collector
+      - otel-collector
     environment:
+      - CLICKHOUSE_URL=http://clickhouse:8123
       - OTEL_TRACES_EXPORTER=otlp
-      - OTEL_METRICS_EXPORTER=otlp
+      - OTEL_METRICS_EXPORTER=none
       - OTEL_LOGS_EXPORTER=none
       - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
       - OTEL_INSTRUMENTATION_HTTP_CLIENT_EMIT_EXPERIMENTAL_TELEMETRY=true
       - OTEL_INSTRUMENTATION_HTTP_SERVER_EMIT_EXPERIMENTAL_TELEMETRY=true
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel_collector:4317
       - OTEL_TRACES_SAMPLER=always_on
       - OTEL_IMR_EXPORT_INTERVAL=5000
-      - OTEL_SERVICE_NAME=omsvclyr
+      - OTEL_SERVICE_NAME=test-service
       - OTEL_METRIC_EXPORT_INTERVAL=5000
-      - OTEL_RESOURCE_ATTRIBUTES="job=job,application=omsvclyr,service.name=service-layer,service.version=1.0,deployment.environment=development"
+      - OTEL_RESOURCE_ATTRIBUTES="job=job,application=test-service,service.name=service-layer,service.version=1.0,deployment.environment=development"
 
 networks:
   inst-java-apps-using-otel:
