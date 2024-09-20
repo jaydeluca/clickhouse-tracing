@@ -30,7 +30,9 @@ public class Main {
     }
 
     private static void clickhouse() throws ClickHouseException, ExecutionException, InterruptedException {
-        ClickHouseNodes servers = ClickHouseNodes.of("http://localhost:8123/default?compress=0");
+        String clickhouseUrl = System.getenv().getOrDefault("CLICKHOUSE_URL", "http://localhost:8123");
+
+        ClickHouseNodes servers = ClickHouseNodes.of(clickhouseUrl + "/default?compress=0");
         ClickHouseResponse response;
 
         setup(servers);
