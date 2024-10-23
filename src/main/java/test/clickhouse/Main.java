@@ -6,30 +6,17 @@ import java.util.concurrent.*;
 import com.clickhouse.client.*;
 import com.clickhouse.client.config.ClickHouseClientOption;
 import com.clickhouse.data.*;
-import io.opentelemetry.api.*;
-import io.opentelemetry.api.trace.*;
-import io.opentelemetry.context.*;
 
 
 public class Main {
     private static ClickHouseClient client;
-    private static Tracer tracer = GlobalOpenTelemetry.getTracer("application");
 
 
     public static void main(String[] args) throws ClickHouseException, ExecutionException, InterruptedException {
-        Span span = tracer.spanBuilder("Application Main").setSpanKind(SpanKind.INTERNAL).startSpan();
-
-        try (Scope scope = span.makeCurrent()) {
-            clickhouse();
-        } catch (Throwable t) {
-            span.recordException(t);
-            throw t;
-        } finally {
-            span.end();
-        }
+        clickhouseV1();
     }
 
-    private static void clickhouse() throws ClickHouseException, ExecutionException, InterruptedException {
+    private static void clickhouseV1() throws ClickHouseException, ExecutionException, InterruptedException {
         String clickhouseUrl = System.getenv().getOrDefault("CLICKHOUSE_URL", "http://localhost:8123");
 
         ClickHouseNodes servers = ClickHouseNodes.of(clickhouseUrl + "/default?compress=0");
@@ -129,22 +116,14 @@ public class Main {
     }
 
     private static void setup(ClickHouseNodes servers) throws ExecutionException, InterruptedException {
-        Span span = tracer.spanBuilder("Setup Database").setSpanKind(SpanKind.INTERNAL).startSpan();
 
-        try (Scope scope = span.makeCurrent()) {
-            CompletableFuture<List<ClickHouseResponseSummary>> future = ClickHouseClient.send(servers.apply(servers.getNodeSelector()),
-                "create database if not exists my_base",
-                "use my_base",
-                "create table if not exists test_table(s String) engine=Memory",
-                "truncate test_table",
-                "insert into test_table values('1')('2')('3')");
-            future.get();
-
-        } catch (Throwable t) {
-            span.recordException(t);
-            throw t;
-        } finally {
-            span.end();
-        }
+        CompletableFuture<List<ClickHouseResponseSummary>> future = ClickHouseClient.send(servers.apply(servers.getNodeSelector()),
+            "create database if not exists my_base",
+            "use my_base",
+            "create table if not exists test_table(s String) engine=Memory",
+            "truncate test_table",
+            "insert into test_table values('1')('2')('3')");
+        future.get();
     }
 }
+

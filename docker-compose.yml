@@ -44,20 +44,11 @@ services:
       - inst-java-apps-using-otel
     depends_on:
       - otel-collector
+    volumes:
+      - ./sdk-config.yml:/app/sdk-config.yml
     environment:
       - CLICKHOUSE_URL=http://clickhouse:8123
-      - OTEL_TRACES_EXPORTER=otlp
-      - OTEL_METRICS_EXPORTER=none
-      - OTEL_LOGS_EXPORTER=none
-      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
-      - OTEL_INSTRUMENTATION_HTTP_CLIENT_EMIT_EXPERIMENTAL_TELEMETRY=true
-      - OTEL_INSTRUMENTATION_HTTP_SERVER_EMIT_EXPERIMENTAL_TELEMETRY=true
-      - OTEL_TRACES_SAMPLER=always_on
-      - OTEL_IMR_EXPORT_INTERVAL=5000
-      - OTEL_SERVICE_NAME=test-service
-      - OTEL_METRIC_EXPORT_INTERVAL=5000
-      - OTEL_RESOURCE_ATTRIBUTES="job=job,application=test-service,service.name=service-layer,service.version=1.0,deployment.environment=development"
+      - OTEL_EXPERIMENTAL_CONFIG_FILE=/app/sdk-config.yml
 
 networks:
   inst-java-apps-using-otel:
