@@ -1,0 +1,14 @@
+file_format: "0.1"
+
+resource:
+  attributes:
+    - name: service.name
+      value: service-layer
+
+tracer_provider:
+  processors:
+    - batch:
+        exporter:
+          otlp:
+            endpoint: http://otel-collector:4318/v1/traces
+            protocol: http/protobuf

@@ -10,7 +10,7 @@ FROM openjdk:17-jdk-slim
 
 COPY --from=build /app/build/libs/ /app
 
-COPY ./opentelemetry-javaagent.jar /app
+COPY ./opentelemetry-javaagent-2-9-0.jar /app/opentelemetry-javaagent.jar
 
 WORKDIR /app
 
