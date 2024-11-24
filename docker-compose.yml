@@ -38,17 +38,17 @@ services:
       - "4318:4318"   # otlp receiver http
       - "55679:55679" # zpages extension
 
-  service-layer:
-    build: .
-    networks:
-      - inst-java-apps-using-otel
-    depends_on:
-      - otel-collector
-    volumes:
-      - ./sdk-config.yml:/app/sdk-config.yml
-    environment:
-      - CLICKHOUSE_URL=http://clickhouse:8123
-      - OTEL_EXPERIMENTAL_CONFIG_FILE=/app/sdk-config.yml
+#  service-layer:
+#    build: .
+#    networks:
+#      - inst-java-apps-using-otel
+#    depends_on:
+#      - otel-collector
+#    volumes:
+#      - ./sdk-config.yml:/app/sdk-config.yml
+#    environment:
+#      - CLICKHOUSE_URL=http://clickhouse:8123
+#      - OTEL_EXPERIMENTAL_CONFIG_FILE=/app/sdk-config.yml
 
 networks:
   inst-java-apps-using-otel:
