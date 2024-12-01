@@ -21,7 +21,7 @@ services:
       - "14268:14268"
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.102.0
+    image: otel/opentelemetry-collector-contrib:0.114.0
     volumes:
       - ./collector-config.yml:/etc/otelcol/collector-config.yml
     command: --config /etc/otelcol/collector-config.yml
