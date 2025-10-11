@@ -13,6 +13,7 @@ repositories {
 
 dependencies {
     implementation("com.clickhouse:clickhouse-http-client:0.6.5")
+    implementation("com.clickhouse:client-v2:0.7.1")
     implementation("org.apache.httpcomponents.client5:httpclient5:5.2.3")
 }
 
